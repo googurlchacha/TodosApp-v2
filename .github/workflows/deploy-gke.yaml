@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: project-f04e475a-84e6-4c88-950
-  GKE_CLUSTER: todo-application
-  GKE_LOCATION: us-central1
-  GAR_REGION: us-central1
-  GAR_REPOSITORY: todo-repo
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GKE_CLUSTER: ${{ vars.GKE_CLUSTER }}
+  GKE_LOCATION: ${{ vars.GKE_LOCATION }}
+  GAR_REGION: ${{ vars.GAR_REGION }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
   BACKEND_IMAGE_NAME: todos-backend
   FRONTEND_IMAGE_NAME: todos-frontend
 

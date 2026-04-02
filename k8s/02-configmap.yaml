@@ -1,0 +1,17 @@
+# Non-secret settings shared by Postgres, backend, and frontend.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-app-config
+  namespace: todos
+data:
+  POSTGRES_USER: "todo"
+  POSTGRES_DB: "todos"
+  PGDATA: "/var/lib/postgresql/data/pgdata"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "todo"
+  DB_NAME: "todos"
+  PORT: "3000"
+  BACKEND_HOST: "todo-backend"

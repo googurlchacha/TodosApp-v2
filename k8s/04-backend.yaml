@@ -1,0 +1,46 @@
+# Image must match exactly what you push, e.g.:
+#   docker build -t us-central1-docker.pkg.dev/PROJECT_ID/REPO/todos-backend:latest ./backend
+#   docker push us-central1-docker.pkg.dev/PROJECT_ID/REPO/todos-backend:latest
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-backend
+  namespace: todos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-backend
+  template:
+    metadata:
+      labels:
+        app: todo-backend
+    spec:
+      containers:
+        - name: api
+          image: us-central1-docker.pkg.dev/project-f04e475a-84e6-4c88-950/todo-repo/todos-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: todo-app-config
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-backend
+  namespace: todos
+spec:
+  selector:
+    app: todo-backend
+  ports:
+    - port: 3000
+      targetPort: 3000

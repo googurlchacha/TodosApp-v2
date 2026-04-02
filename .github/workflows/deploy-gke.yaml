@@ -1,0 +1,69 @@
+name: CI/CD to GKE
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: project-f04e475a-84e6-4c88-950
+  GKE_CLUSTER: todo-application
+  GKE_LOCATION: us-central1
+  GAR_REGION: us-central1
+  GAR_REPOSITORY: todo-repo
+  BACKEND_IMAGE_NAME: todos-backend
+  FRONTEND_IMAGE_NAME: todos-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth for Artifact Registry
+        run: gcloud auth configure-docker "$GAR_REGION-docker.pkg.dev" --quiet
+
+      - name: Build and push backend image
+        run: |
+          BACKEND_IMAGE="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPOSITORY/$BACKEND_IMAGE_NAME:latest"
+          docker build -t "$BACKEND_IMAGE" ./backend
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build and push frontend image
+        run: |
+          FRONTEND_IMAGE="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPOSITORY/$FRONTEND_IMAGE_NAME:latest"
+          docker build -t "$FRONTEND_IMAGE" ./frontend
+          docker push "$FRONTEND_IMAGE"
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_LOCATION }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Deploy manifests
+        run: kubectl apply -f ./k8s
+
+      - name: Restart app deployments to pull latest images
+        run: |
+          kubectl rollout restart deployment/todo-backend -n todos
+          kubectl rollout restart deployment/todo-frontend -n todos
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/todo-backend -n todos --timeout=180s
+          kubectl rollout status deployment/todo-frontend -n todos --timeout=180s

@@ -1,0 +1,39 @@
+# Local run: docker compose up --build
+# App: http://localhost:8080  (frontend proxies /api to backend)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: todo
+      POSTGRES_PASSWORD: todo
+      POSTGRES_DB: todos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: todo
+      DB_PASSWORD: todo
+      DB_NAME: todos
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    environment:
+      BACKEND_HOST: backend
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

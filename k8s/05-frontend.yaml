@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend
+  namespace: todos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-frontend
+  template:
+    metadata:
+      labels:
+        app: todo-frontend
+    spec:
+      containers:
+        - name: web
+          image: us-central1-docker.pkg.dev/project-f04e475a-84e6-4c88-950/todo-repo/todos-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: todo-app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-frontend
+  namespace: todos
+spec:
+  type: LoadBalancer
+  selector:
+    app: todo-frontend
+  ports:
+    - port: 80
+      targetPort: 80

@@ -63,7 +63,7 @@ export default function App() {
 
   return (
     <>
-      <h1>Todos Application</h1>
+      <h1>Todos Application v2</h1>
       {err && <p className="error">{err}</p>}
       <form onSubmit={add}>
         <input

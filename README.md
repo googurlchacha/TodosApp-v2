@@ -7,6 +7,8 @@
 
 ## Run locally (Docker Compose)
 
+Docker Compose reads **`postgres/.env`**, **`backend/.env`**, and **`frontend/.env`** (no inline `environment:` in `docker-compose.yaml`). After cloning, copy each **`*.env.example`** to **`.env`** in the same folder and adjust values if needed.
+
 ```bash
 docker compose up --build
 ```

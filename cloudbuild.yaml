@@ -1,0 +1,38 @@
+# Google Cloud Build — build and push app images to Artifact Registry.
+#
+# Prereqs: Artifact Registry repo exists, Cloud Build API enabled, Cloud Build SA can push to AR.
+#
+# Run from repo root:
+#   gcloud builds submit --config=cloudbuild.yaml .
+#
+# Override region/repo:
+#   gcloud builds submit --config=cloudbuild.yaml \
+#     --substitutions=_REGION=us-central1,_REPOSITORY=todo-repo .
+
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: todo-repo
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - id: build-backend
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/todos-backend:latest
+      - ./backend
+
+  - id: build-frontend
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/todos-frontend:latest
+      - ./frontend
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/todos-backend:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/todos-frontend:latest

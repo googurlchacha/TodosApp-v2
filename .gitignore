@@ -1,4 +1,8 @@
 node_modules
 dist
-.env
 *.log
+
+# Local env files (templates: **/.env.example)
+postgres/.env
+backend/.env
+frontend/.env

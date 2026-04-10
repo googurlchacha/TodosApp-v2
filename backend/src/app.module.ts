@@ -12,6 +12,11 @@ import { Todo } from './todos/todo.entity';
       username: process.env.DB_USER ?? 'todo',
       password: process.env.DB_PASSWORD ?? 'todo',
       database: process.env.DB_NAME ?? 'todos',
+      // Cloud SQL public IP requires TLS; omit or false when using local Docker / Cloud SQL Auth Proxy on localhost
+      ssl:
+        process.env.DB_SSL === 'true'
+          ? { rejectUnauthorized: false }
+          : false,
       entities: [Todo],
       synchronize: true,
     }),
